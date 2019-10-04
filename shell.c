@@ -43,40 +43,43 @@ int main() {
         }
 
        // 1. Tokenize the command line input (split it on whitespace)
-        int isVariable = 1, i = 0;
+        //int isVariable = 1;
+        int i = 0;
         token = strtok(command_line, delimiters);
         while (token != NULL)
         {
-           if (isVariable) 
-              printf("%s\n", token); //WHY THE SAME???????????????????????????
-           else{
-              printf("%s\n", token); //WHY THE SAME????????????????????????
-           }
-           isVariable = isVariable ? 0 : 1;
+//            if (isVariable) 
+//               printf("%s\n", token); //WHY THE SAME???????????????????
+//            else{
+//               printf("%s\n", token); //WHY THE SAME???????????????????
+//            }
+//            isVariable = isVariable ? 0 : 1;
+           arguments[i] = token;
            token = strtok(NULL, delimiters);
-          
-          arguments[i] = token;
-          i++;
-          
+           //i++;
+        }
+      
         // 2. Create a child process which will execute the command line input
          //fork a child process
          pid_t pid = fork();
        
-         //checking for error
-         if (pid < 0) { /* an error has occurred*/
-              printf("*** ERROR: forking child process failed\n");
-              return 1;
-         }
-         else if (pid == 0) { //child process          
-//               if (execve(arguments, environ, NULL) < 0) {     
-//                    printf("*** ERROR: exec failed\n");
-//                    return 1;
-//               }
-               execlp("/bash/ls", "ls", NULL);
+//          //checking for error
+//          if (pid < 0) { /* an error has occurred*/
+//               printf("*** ERROR: forking child process failed\n");
+//               return 1;
+//          }
+         if (pid == 0) { //child process          
+              if (execve(arguments[0], arguments, NULL) < 0) {     
+                   printf("*** ERROR: exec failed\n");
+                   fflush(stdout);
+                   //return 1;
+                   exit(0);
+              }
+               //execlp("/bash/ls", "ls", NULL);
          }
     
        // 3. The parent process should wait for the child to complete
-         else { //parent process   
+         else if (pid > 0){ //parent process   
            //the parent process will wait for the child process to finish
               wait(NULL);
          }
@@ -92,12 +95,8 @@ int main() {
 //         man execve
 //         man wait
 //         man strtok
-          
-          
-        }
-
-        return 0;
-
+        
+      //return 0;
     }
     
     // This should never be reached.
