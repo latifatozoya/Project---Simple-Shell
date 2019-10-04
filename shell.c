@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include<unistd.h> 
-#include <sys/types.h>
-#include<sys/wait.h> 
 
 #define MAX_COMMAND_LINE_LEN 1024
 #define MAX_COMMAND_LINE_ARGS 128
@@ -12,7 +10,6 @@
 char prompt[] = "shell > ";
 char delimiters[] = " \t\r\n";
 char *token;
-char **environ;
 
 int main() {
     // Stores the string typed into the command line.
@@ -42,61 +39,49 @@ int main() {
             return 0;
         }
 
-       // 1. Tokenize the command line input (split it on whitespace)
-        //int isVariable = 1;
+       //Tokenize the command line input (split it on whitespace)
+        
         int i = 0;
         token = strtok(command_line, delimiters);
         while (token != NULL)
         {
-//            if (isVariable) 
-//               printf("%s\n", token); //WHY THE SAME???????????????????
-//            else{
-//               printf("%s\n", token); //WHY THE SAME???????????????????
-//            }
-//            isVariable = isVariable ? 0 : 1;
            arguments[i] = token;
            token = strtok(NULL, delimiters);
-           //i++;
         }
       
-        // 2. Create a child process which will execute the command line input
-         //fork a child process
-         pid_t pid = fork();
-       
-//          //checking for error
-//          if (pid < 0) { /* an error has occurred*/
-//               printf("*** ERROR: forking child process failed\n");
-//               return 1;
-//          }
-         if (pid == 0) { //child process          
-              if (execve(arguments[0], arguments, NULL) < 0) {     
-                   printf("*** ERROR: exec failed\n");
-                   fflush(stdout);
-                   //return 1;
-                   exit(0);
-              }
-               //execlp("/bash/ls", "ls", NULL);
+        //Create a child process which will execute the command line input 
+        //and the parent process should wait for the child to complete.
+        
+        pid_t pid = fork();  //fork a child process
+      
+        //checking for error
+        if (pid < 0) {
+              printf("*** ERROR: forking child process failed\n");
+              return 1;
          }
-    
-       // 3. The parent process should wait for the child to complete
-         else if (pid > 0){ //parent process   
-           //the parent process will wait for the child process to finish
-              wait(NULL);
+        
+        else if (pid == 0) {    //child process          
+           if (execve(arguments[0], arguments, NULL) < 0) {     
+             printf("*** ERROR: exec failed\n");
+             fflush(stdout);
+             exit(0);
+            }
          }
       
+        else { //parent process   
+           wait(NULL);
+         }    
       
 //         TODO:
 //         1. Tokenize the command line input (split it on whitespace)
 //         2. Create a child process which will execute the command line input
 //         3. The parent process should wait for the child to plete
-  
 //         Hints (put these into Google):
 //         man fork
 //         man execve
 //         man wait
 //         man strtok
-        
-      //return 0;
+
     }
     
     // This should never be reached.
